@@ -1,0 +1,108 @@
+pragma solidity ^0.5.1;
+
+// Criminal records is just like a class having a set of rules ......
+contract CriminalRecords{
+    
+    
+    // to quickly check whether an aadharNumber is present in criminal database or not .....
+    mapping(string => uint) aadharDatabase;
+    
+    struct crimeRecords {
+        uint crimeId; // crimeId or act that has been imposed ....there can be more than one act ......
+        string name; // name of the criminal ....
+        uint age; // age of the criminal ....
+        string date; // date at which crime was recorded ....
+        string place; // place where crime took place ...
+        uint present; // check if crime has been previously recorded for this aadharNumber .....
+    }
+    
+    // used for storing the crime records corresponding to a single aadharNumber ....
+    mapping(string => crimeRecords) aadharNumberRecordMapping;
+    
+    // comparing two strings ....
+    function compareTwoStrings(string memory a,string memory b) public pure returns(bool){
+        
+        if(keccak256(abi.encode(a)) == keccak256(abi.encode(b))){ 
+            return true;
+        }
+        return false;
+    }
+    
+    // function to add new criminal record .....
+    function addCrimeRecord(string memory _aadharNumber,uint _crimeId,string memory _name,uint _age,string memory _date,string memory _place,uint _present) public {
+        // update the aadharDatabase to ensure that this person has a criminal record .....
+        aadharDatabase[_aadharNumber] = 1;
+        
+        crimeRecords memory tempRecord = crimeRecords({crimeId:_crimeId,
+            name : _name,
+            age : _age,
+            date : _date,
+            place : _place,
+            present : _present
+        });
+        
+        // keeps records corresponding to aadharNumber ....
+        aadharNumberRecordMapping[_aadharNumber] = tempRecord;
+    } 
+    
+    function getCrimeRecordForIndividual(string memory _aadharNumber) public view returns(uint,string memory,uint,string memory,string memory,uint) {
+        
+        // have a condition which checks whether the aadharNumber is in database or not .....
+        if(aadharDatabase[_aadharNumber] != 1){
+            // aadharNumber is not present in the database ....
+            return (0,"0",0,"0","0",0);
+        }
+        
+        crimeRecords memory temporaryRecord = aadharNumberRecordMapping[_aadharNumber];
+        return(temporaryRecord.crimeId,temporaryRecord.name,temporaryRecord.age,temporaryRecord.date,temporaryRecord.place,temporaryRecord.present);
+    }
+    
+    // get the name of the criminal corresponding to the given aadharNumber ....
+    function getName(string memory _aadharNumber) public view returns(string memory){
+        require(aadharNumberRecordMapping[_aadharNumber].present == 1,"Record not present");
+        return aadharNumberRecordMapping[_aadharNumber].name;
+    }
+    
+    // get the age of the criminal corresponding to the given aadharNumber ...
+    function getAge(string memory _aadharNumber) public view returns(uint){
+        require(aadharNumberRecordMapping[_aadharNumber].present == 1,"Record not present");
+        return aadharNumberRecordMapping[_aadharNumber].age;
+    }
+    
+    // get the crimeId or the act imposed by that crime ....
+    function getCrimeId(string memory _aadharNumber) public view returns(uint){
+        require(aadharNumberRecordMapping[_aadharNumber].present == 1,"Record not present");
+        return aadharNumberRecordMapping[_aadharNumber].crimeId;
+    }
+    
+    // get the date of the crime done ....
+    function getDate(string memory _aadharNumber) public view returns(string memory){
+        require(aadharNumberRecordMapping[_aadharNumber].present == 1,"Record not present");
+        return aadharNumberRecordMapping[_aadharNumber].date;
+    }
+    
+    // get the place of crime corresponding to the given aadhar number ....
+    function getPlace(string memory _aadharNumber) public view returns(string memory){
+        require(aadharNumberRecordMapping[_aadharNumber].present == 1,"Record not present");
+        return aadharNumberRecordMapping[_aadharNumber].place;
+    }
+    
+    // function to check whether the criminal Record for this aadhar number is present or not ....
+    function isAadharNumberPresent(string memory _aadharNumber) public view returns(uint){
+        if(aadharNumberRecordMapping[_aadharNumber].present == 1){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+    
+    
+    
+}
+
+
+
+
+
+
